@@ -1,0 +1,106 @@
+entity Order { 
+    int id [K], 
+    string date,
+    string deliveryDate,
+    int totalPrice,
+    ref Item[*] consists_of, 
+    ref Carrier[1] delivers,
+    ref Customer[1] requests,
+    ref Payment[1] commits
+}
+
+entity Carrier { 
+    int id [K], 
+    string name,
+    string[] contacts,
+    ref Order[*] delivers 
+}
+
+
+entity Payment { 
+    int id [K], 
+    string date,
+    ref Order[1] commits 
+}
+
+
+entity Item { 
+    int id [K],
+    int quantity,
+    ref Product[1] references, 
+    ref Order[1] consists_of 
+}
+
+
+entity Customer { 
+    int id [K], 
+    string name,
+    string[] contacts,    
+    ref Order[*] requests 
+}
+
+
+entity Product { 
+    int id [K], 
+    int price,
+    string description,
+    ref Item[*] references, 
+    ref Supplier[1] furnishes,
+    ref Category[1] catalogues
+}
+
+
+entity Supplier { 
+    int id [K], 
+    string name,
+    string[] contacts,  
+    ref Product[*] furnishes 
+}
+
+
+entity Category { 
+    int id [K],
+    string description,
+    ref Product[*] catalogues 
+}
+
+query Q1 {
+   SELECT Customer.name, Customer.contacts, Order.id, Order.date, Order.deliveryDate, Order.totalPrice, Item.id, Item.quantity, Product.id, Product.price, Product.description           
+   FROM Customer.requests.Order.consists_of.Item.references.Product
+   WHERE Customer.id = ?
+}
+
+query Q2 {
+    SELECT Customer.name, Customer.contacts, Order.id, Order.date, Order.deliveryDate, Order.totalPrice, Payment.id, Payment.date
+    FROM Customer.requests.Order.commits.Payment
+    WHERE Customer.id = ?
+}
+
+query Q3 {
+    SELECT Customer.name, Customer.contacts, Order.id, Order.date, Order.deliveryDate, Order.totalPrice, Carrier.id, Carrier.name, Carrier.contacts
+    FROM Customer.requests.Order.delivers.Carrier
+    WHERE Customer.id = ?
+}
+
+query Q4 {
+    SELECT Product.id, Product.price, Product.description
+    FROM Category.catalogues.Product
+    WHERE Category.id = ?
+}
+
+query Q5 {
+    SELECT Product.id, Product.price, Product.description
+    FROM Supplier.furnishes.Product
+    WHERE Supplier.id = ?
+}
+
+query Q6 {
+    SELECT Product.id, Product.price, Product.description , Category.id, Category.description, Supplier.id, Supplier.name, Supplier.contacts
+    FROM Product.catalogues.Category; Product.furnishes.Supplier
+    WHERE Product.id = ?
+}
+
+
+
+
+

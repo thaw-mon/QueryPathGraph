@@ -1,0 +1,68 @@
+entity Session { 
+    int id [K], 
+    string startingTime,
+    string endingTime,   
+    ref Player[1] owns,
+    ref Server[1] handles,
+    ref State[*] captures
+}
+
+
+entity State { 
+    int id [K], 
+    int posX,
+    int posY,
+    int posZ,
+    int timestamp,
+    ref Session[1] captures 
+}
+
+entity Player { 
+    int id [K], 
+    string name,
+    string flags, 
+    int isAdmin, 
+    ref Session[*] owns 
+}
+
+
+entity Server { 
+    int id [K],
+    string name,
+    string IP,
+    ref Session[*] handles 
+}
+
+
+query Q1 {
+    SELECT Session.id, State.id, State.posX, State.posY, State.posZ, State.timestamp         
+    FROM Server.handles.Session.captures.State; Session.owns.Player
+    WHERE Server.id = ? AND Player.id= ?
+    Order by State.timestamp
+}
+
+query Q2 {
+    SELECT Player.id, Session.id, State.id, State.posX, State.posY, State.posZ, State.timestamp    
+    FROM Server.handles.Session.captures.State; Session.owns.Player
+    WHERE Server.id = ?
+    Order by State.timestamp, Player.id
+}
+
+query Q3 {
+    SELECT Server.name, Server.IP,
+    FROM Server 
+    WHERE Server.id = ?
+}
+
+query Q4 {
+    SELECT Server.name, 
+    FROM Server 
+    WHERE Server.id = ?
+}
+
+query Q5 {
+    SELECT Session.id 
+    FROM Player.owns.Session 
+    WHERE Player.id = ?
+}
+

@@ -1,0 +1,107 @@
+entity User { 
+    int id [K], 
+    string name,
+    string[] expertises,
+    string email,
+    ref Artifact[*] likes,
+    ref Venue[*] likes,
+    ref Review[*] posts,
+    ref Review[*] likes
+}
+
+
+entity Review { 
+    int id [K], 
+    string title,
+    string body,
+    int rating,
+    string date,
+    ref User[1] posts, 
+    ref User[*] likes,
+    ref Artifact[1] rates
+}
+
+
+entity Artifact { 
+    int id [K], 
+    string title,
+    string[] authors,
+    string[] keywords,
+    ref Review[*] rates, 
+    ref User[*] likes,
+    ref Venue[1] features
+}
+
+
+entity Venue { 
+    string name [K], 
+    int year [K],
+    string[] topics,
+    string country,
+    string homepage,
+    ref Artifact[*] features, 
+    ref User[*] likes
+}
+
+query Q1 {
+    SELECT Artifact.id, Artifact.title, Artifact.authors, Artifact.keywords
+    FROM Venue.features.Artifact 
+    WHERE Venue.name = ? AND Venue.year >= ?
+    ORDER BY Venue.year(DESC)
+}
+
+query Q2 {
+    SELECT Artifact.id, Artifact.title, Artifact.authors, Artifact.keywords, Venue.name
+    FROM Artifact.features.Venue
+    WHERE Artifact.author = ?
+    ORDER BY Venue.year(DESC)
+}
+
+query Q3 {
+    SELECT User.id, User.name, User.email, User.expertises
+    FROM Artifact.likes.User
+    WHERE Artifact.id = ?
+}
+
+query Q4 {
+    SELECT User.id, User.name, User.email, User.expertises
+    FROM Artifact.likes.User
+    WHERE Artifact.id = ? AND User.expertises = ?
+}
+
+query Q5 {
+    SELECT Review.rating
+    FROM Artifact.rates.Review
+    WHERE Artifact.id = ?
+}
+
+query Q6 {
+    SELECT Venue.name, Venue.year, Venue.homepage, Venue.country, Venue.topics
+    FROM User.likes.Venue 
+    WHERE User.id = ?  
+}
+
+query Q7 {
+    SELECT Artifact.title, Artifact.authors
+    FROM User.likes.Artifact.features.Venue
+    WHERE User.id = ? AND Venue.year >= ?
+    ORDER BY Venue.year(DESC)
+}
+
+query Q8 {
+    SELECT Review.id, Review.rating, Review.body, Review.date, Review.title
+    FROM User.posts.Review
+    WHERE User.id = ? AND Review.rating >= ?
+    ORDER BY Review.rating(DESC)
+}
+
+query Q9 {
+    SELECT Artifact.id, Artifact.title, Artifact.authors, Artifact.keywords
+    FROM Artifact
+    WHERE Artifact.id = ?
+}
+
+
+
+
+
